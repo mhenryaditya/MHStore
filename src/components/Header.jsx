@@ -36,7 +36,7 @@ function Header({ pageActive = 'home' }) {
         }
 
         toast.dismiss();
-        toast.success("Logged in successfully!")
+        toast.success("Logged out successfully!")
     }
 
     let logOut = () => {
