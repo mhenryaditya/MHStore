@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -8,6 +8,8 @@ import Alert from "../components/Alert";
 import { HiHome } from "react-icons/hi";
 import { setProducts } from "../data/productsReducer";
 import toast from "react-hot-toast";
+import refreshCount from "../plugins/cartCountStore"
+import fetchAPI from "../plugins/fetchData";
 
 function Cart() {
     let data = useSelector(state => state)
@@ -17,11 +19,33 @@ function Cart() {
     let [isLoading, setLoading] = useState(true)
     let [isLostCon, setLostCon] = useState(false)
 
+    let initialise = async () => {
+        setLoading(true)
+        if (data.products.length === 0) {
+            try {
+                await fetchAPI(dispatch)
+            } catch (error) {
+                setLostCon(true)
+            }
+        }
+        setLoading(false)
+    }
+    
+    useEffect(() => {
+        initialise()
+        
+        let cart = localStorage.getItem('cart') 
+        if (cart) {
+            setMyCart(JSON.parse(cart))
+        }
+
+    }, [data.products, fetchAPI, dispatch])
+
     let handleInput = (e, i) => {
         let dataCart = [...myCart]
         let index = dataCart.findIndex(item => item.id === i)
         if (index !== -1) {
-            dataCart[index].quantity = Number(e.target.value)
+            dataCart[index].quantity = Number(e.target.value) > 0 ? Number(e.target.value) : 1
             setMyCart(dataCart)
             localStorage.setItem('cart', JSON.stringify(dataCart))
         }
@@ -55,7 +79,7 @@ function Cart() {
             setMyCart(dataCart)
             localStorage.setItem('cart', JSON.stringify(dataCart))
         }
-        
+        refreshCount(dispatch)
     }
 
     let checkOut = () => {
@@ -72,29 +96,18 @@ function Cart() {
         dispatch(setProducts(dataProducts))
         localStorage.removeItem('cart')
         toast.success('Checkout product successfully')
+        refreshCount(dispatch)
         navigate('/')
     }
 
     let totalPrice = myCart.reduce((total, item) => {
         const product = Object.entries(data.products).find(([_, p]) => p.id === item.id)?.[1]
-        return total + product.price * item.quantity
+        return total + (product ? product.price : 0) * item.quantity
     }, 0)
-
-    useEffect(() => {
-        if (data.user.nameUser === null) {
-            navigate('/')
-        }
-        let cart = localStorage.getItem('cart') 
-        if (cart) {
-            setMyCart(JSON.parse(cart))
-        }
-
-        setLoading(false)
-    }, [data.user.nameUser, navigate])
 
     return (
         <>
-            <Header pageActive="cart" />
+            <Header />
             {isLoading ? (
                 <div className="flex justify-center mt-32">
                 <Loading />

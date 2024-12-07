@@ -1,28 +1,21 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { useEffect, useState } from "react"
-import setUserProfileStore from "../plugins/userProfileStore"
 import { setEmailUser, setNameUser } from "../data/userReducer"
 import toast from "react-hot-toast"
+import fillStore from "../plugins/userProfileStore"
+import refreshCount from "../plugins/cartCountStore"
 
-function Header({ pageActive = 'home' }) {
+function Header() {
     let data = useSelector(state => state)
     let dispatch = useDispatch()
     let [userDropdown, setUserDropdown] = useState(false)
-    let [bcDropdown, setBcDropdown] = useState(false)
-    // let navigate = useNavigate()
-
-    let fillStore = async () => {
-        let token = localStorage.getItem('token')
-        if (token) {
-            await setUserProfileStore(token, dispatch)
-        }
-    }
 
     useEffect(() => {
         if (data.user.nameUser === null && data.user.emailUser === null) {
-            fillStore()
+            fillStore(dispatch)
         }
+        refreshCount(dispatch)
     })
 
     let processLogOut = () => {
@@ -77,14 +70,26 @@ function Header({ pageActive = 'home' }) {
                         <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">MHStore</span>
                     </Link>
                     {/* Right */}
-                    <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-                        <div className="items-center justify-start w-full md:flex md:w-auto md:order-1">    
-                            
+                    <div className={`${data.user.nameUser === null && data.user.emailUser === null ? 'hidden': ''} flex gap-7 items-center md:order-2`}>
+                        {/* Navigation */}
+                        <ul className="w-8 bg-gray-50 md:bg-slate-50 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                            {(data.user.nameUser !== null) ? (
+                                <li>
+                                    <Link to="/cart" className="relative flex rounded text-[#17c6b4]" aria-current="page">
+                                        {data.cartCount > 0 ? (<span className="absolute z-10 text-[10pt] right-[-7%] bottom-4 rounded-full px-1.5 bg-green-700 text-white">{data.cartCount}</span>) : ''}
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="bi bi-cart2" viewBox="0 0 16 16">
+                                           <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5M3.14 5l1.25 5h8.22l1.25-5zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0m9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0"/>
+                                        </svg>
+                                    </Link>
+                                </li>
+                            ) : ''}
+                        </ul>
+                        <div className="items-center justify-start w-fit">    
                             {/* User Profile */}
                             <div className="relative">
                                 <button type="button" onClick={() => setUserDropdown(!userDropdown)} className="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false">
                                     <span className="sr-only">Open user menu</span>
-                                    <img className="w-8 h-8 rounded-full" src="/user.png" alt="user photo" />
+                                    <img className="w-8 rounded-full" src="/user.png" alt="user photo" />
                                 </button>
                                 <div className={`${userDropdown ? 'block' : 'hidden'} absolute right-0 top-7 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600`}>
                                     <div className="px-4 py-3">
@@ -114,54 +119,7 @@ function Header({ pageActive = 'home' }) {
                                 </div>
                             </div>
                         </div>
-                        
-                        <button onClick={() => setBcDropdown(!bcDropdown)} type="button" className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
-                            <span className="sr-only">Open main menu</span>
-                            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15"/>
-                            </svg>
-                        </button>
                     </div>
-                    <div className={`${bcDropdown ? 'block' : 'hidden'} items-center justify-start w-full md:flex md:w-auto md:order-1`} id="navbar-sticky">
-                            {/* Navigation */}
-                            <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium w-full border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-slate-50 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                            {pageActive !== 'home' ? (
-                                <>
-                                    <li>
-                                        <Link to="/" className="flex gap-2 py-2 px-3 text-gray-900 rounded hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
-                                            <img src="/shop.svg" alt="home" className="w-5" />
-                                            <span>Home</span>
-                                        </Link>
-                                    </li>
-                                    {(data.user.nameUser !== null) ? (
-                                        <li>
-                                            <Link to="/cart" className="flex gap-2 py-2 px-3 text-white bg-[#12c2b6] rounded" aria-current="page">
-                                                <img src="/cart-white.svg" alt="home" className="w-5" />
-                                                <span>Cart</span>
-                                            </Link>
-                                        </li>
-                                    ) : ''}
-                                    
-                                </>) : (
-                                    <>
-                                        <li>
-                                            <Link to="/" className="flex gap-2 py-2 px-3 text-white bg-[#12c2b6] rounded" aria-current="page">
-                                                <img src="/shop-white.svg" alt="home" className="w-5" />
-                                                <span>Home</span>
-                                            </Link>
-                                        </li>
-                                        {(data.user.nameUser !== null) ? (
-                                            <li>
-                                                <Link to="/cart" className="flex gap-2 py-2 px-3 text-gray-900 rounded hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
-                                                    <img src="/cart.svg" alt="home" className="w-5" />
-                                                    <span>Cart</span>
-                                                </Link>
-                                            </li>
-                                        ) : ''}
-                                    </>
-                            )}
-                            </ul>
-                        </div>
                 </div>
             </nav>
         </>

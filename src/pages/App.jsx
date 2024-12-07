@@ -1,4 +1,3 @@
-import { Carousel } from "flowbite-react"
 import Header from "../components/Header"
 import { useDispatch, useSelector } from "react-redux"
 import { useEffect, useState } from "react"
@@ -17,11 +16,12 @@ function App() {
 
   let handleFetch = async () => {
     try {
-      setLoading(await fetchAPI(dispatch))
+      await fetchAPI(dispatch)
     } catch (error) {
       setLoading(false)
       setLostCon(true)
     }
+    setLoading(false)
     
   }
   
@@ -31,7 +31,7 @@ function App() {
     } else {
       setLoading(false)
     }
-  }, [data.products.length])
+  }, [data.products, fetchAPI, dispatch])
 
   return (
     <>

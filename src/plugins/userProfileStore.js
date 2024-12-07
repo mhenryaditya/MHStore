@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode"
 import axios from "axios"
 import { setNameUser, setEmailUser } from "../data/userReducer"
 
-export default async function setUserProfileStore(token, dispatch) {
+async function setUserProfileStore(token, dispatch) {
     try {
         const getUser = jwtDecode(token)
         const id = getUser.sub
@@ -14,3 +14,12 @@ export default async function setUserProfileStore(token, dispatch) {
     }
     
 }
+
+async function fillStore(dispatch) {
+    let token = localStorage.getItem('token')
+    if (token) {
+        await setUserProfileStore(token, dispatch)
+    }
+}
+
+export default fillStore
