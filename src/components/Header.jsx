@@ -70,7 +70,7 @@ function Header() {
                         <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">MHStore</span>
                     </Link>
                     {/* Right */}
-                    <div className={`${data.user.nameUser === null && data.user.emailUser === null ? 'hidden': ''} flex gap-7 items-center md:order-2`}>
+                    <div className="flex gap-7 items-center md:order-2">
                         {/* Navigation */}
                         <ul className="w-8 bg-gray-50 md:bg-slate-50 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
                             {(data.user.nameUser !== null) ? (
